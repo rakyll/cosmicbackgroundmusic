@@ -137,9 +137,9 @@ func Play(x, y, d int) error {
 	log.Printf("Average intensity at [%d, %d, %d] is [%f, %f, %f]", x, y, d, avgR, avgG, avgB)
 
 	s := &sample{
-		sine:   []float64{avgB / 100, avgB / 50, avgB / 30},
-		square: []float64{avgG / 100, avgG / 50},
-		saw:    []float64{avgR / 10, avgR / 20, avgR / 30, avgR / 40},
+		sine:   []float64{avgB / 128, avgB / 64, avgB / 24},
+		square: []float64{avgG / 128, avgG / 64},
+		saw:    []float64{avgR / 8, avgR / 16, avgR / 32, avgR / 48},
 	}
 	if playing != nil {
 		playing.Stop()

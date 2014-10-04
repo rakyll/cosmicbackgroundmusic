@@ -57,7 +57,7 @@ func Play(x, y, d int) error {
 		if i < 0 || i > size.X {
 			continue
 		}
-		for j := y - d; j < y+d; y++ {
+		for j := y - d; j < y+d; j++ {
 			if j < 0 || j > size.Y {
 				continue
 			}

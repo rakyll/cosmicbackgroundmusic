@@ -5,10 +5,15 @@ import (
 	"io"
 	"log"
 	"sync"
+	"time"
 
 	_ "image/png"
 
 	"github.com/campoy/audio/audio"
+)
+
+const (
+	sampleRate = 44100
 )
 
 var (
@@ -19,14 +24,50 @@ var (
 )
 
 type sample struct {
-	sinFreqs []int64
-	sqFreqs  []int64
-	sawFreqs []int64
+	sine   []float64
+	square []float64
+	saw    []float64
+
+	players []interface{}
 }
 
 func (s *sample) Play() error {
-	// create 3 go routines
-	panic("not yet implemented")
+	// set up players
+	play("sine", time.Second, s.sine)
+	play("square", 500*time.Millisecond, s.square)
+	play("saw", 250*time.Millisecond, s.saw)
+	return nil
+}
+
+func play(wave string, dur time.Duration, sample []float64) {
+	if len(sample) == 0 {
+		return
+	}
+	go func() {
+		i := 0
+		var inst audio.Instrument
+		for {
+			if inst != nil {
+				inst.Stop()
+			}
+			switch wave {
+			case "sine":
+				inst = audio.NewSine(sample[i], sampleRate)
+			case "square":
+				inst = audio.NewSquare(sample[i], sampleRate)
+			case "saw":
+				inst = audio.NewSaw(sample[i], sampleRate)
+			}
+			go func() {
+				inst.Play()
+			}()
+			i++
+			if i == len(sample) {
+				i = 0
+			}
+			<-time.After(dur)
+		}
+	}()
 }
 
 func (s *sample) Stop() {
@@ -49,6 +90,7 @@ func Play(x, y, d int) error {
 	defer mu.Unlock()
 
 	size := img.Bounds().Size()
+	num := float64(0)
 	// scan the area to generate a sample
 	// filter out the transparent pixels
 	rT, gT, bT := 0.0, 0.0, 0.0
@@ -71,19 +113,26 @@ func Play(x, y, d int) error {
 			rT += float64(r)
 			gT += float64(g)
 			bT += float64(b)
+			num++
 		}
 	}
 
-	log.Println(rT, gT, bT)
 	// determine the instruments depending on the microwave intensity
 	// cold: sin wave
 	// med: square wave
 	// hot: saw wave
 
 	// determine a frequencies for each instrumentes
+	avgR := rT / num
+	avgG := gT / num
+	avgB := bT / num
 
-	// play the sample
-	s := &sample{}
+	log.Printf("Average intensity at [%d, %d, %d] is [%f, %f, %f]", x, y, d, avgR, avgG, avgB)
+
+	s := &sample{
+		sine: []float64{1000, 1200, 1500},
+		saw:  []float64{200, 900, 200},
+	}
 	if playing != nil {
 		playing.Stop()
 	}

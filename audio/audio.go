@@ -54,7 +54,9 @@ func play(wave string, dur time.Duration, sample []float64, done chan bool) {
 		for {
 			select {
 			case <-done:
-				inst.Stop()
+				if inst != nil {
+					inst.Stop()
+				}
 				return
 			default:
 				if inst != nil {
@@ -127,11 +129,6 @@ func Play(x, y, d int) error {
 		}
 	}
 
-	// determine the instruments depending on the intensity
-	// cold: sin wave
-	// med: square wave
-	// hot: saw wave
-
 	// determine frequencies for each instrumentes
 	avgR := rT / num
 	avgG := gT / num
@@ -142,7 +139,7 @@ func Play(x, y, d int) error {
 	s := &sample{
 		sine:   []float64{avgB / 100, avgB / 50, avgB / 30},
 		square: []float64{avgG / 100, avgG / 50},
-		saw:    []float64{avgR / 100, avgR / 200, avgR / 300},
+		saw:    []float64{avgR / 10, avgR / 20, avgR / 30, avgR / 40},
 	}
 	if playing != nil {
 		playing.Stop()

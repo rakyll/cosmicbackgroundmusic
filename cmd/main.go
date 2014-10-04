@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 
-	"github.com/rakyll/cosmicmusic/audio"
+	"github.com/rakyll/cosmicbackgroundmusic/audio"
 )
 
 func main() {
@@ -19,11 +20,28 @@ func main() {
 	if err := audio.Initialize(r); err != nil {
 		log.Fatal(err)
 	}
+
 	log.Println("Initiated portaudio.")
 	defer audio.Terminate()
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "render the image here")
+	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		r, err := os.Open("./index.html")
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		io.Copy(w, r)
+	})
+
+	http.HandleFunc("/img", func(w http.ResponseWriter, req *http.Request) {
+		r, err := os.Open("./data/bg.png")
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		io.Copy(w, r)
 	})
 
 	http.HandleFunc("/play", func(w http.ResponseWriter, r *http.Request) {

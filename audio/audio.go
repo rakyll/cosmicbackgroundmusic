@@ -28,18 +28,23 @@ type sample struct {
 	square []float64
 	saw    []float64
 
-	players []interface{}
+	sineDone   chan bool
+	squareDone chan bool
+	sawDone    chan bool
 }
 
 func (s *sample) Play() error {
-	// set up players
-	play("sine", time.Second, s.sine)
-	play("square", 500*time.Millisecond, s.square)
-	play("saw", 250*time.Millisecond, s.saw)
+	s.sineDone = make(chan bool, 1)
+	s.squareDone = make(chan bool, 1)
+	s.sawDone = make(chan bool, 1)
+
+	play("sine", time.Second, s.sine, s.sineDone)
+	play("square", 500*time.Millisecond, s.square, s.squareDone)
+	play("saw", 250*time.Millisecond, s.saw, s.sawDone)
 	return nil
 }
 
-func play(wave string, dur time.Duration, sample []float64) {
+func play(wave string, dur time.Duration, sample []float64, done chan bool) {
 	if len(sample) == 0 {
 		return
 	}
@@ -47,31 +52,36 @@ func play(wave string, dur time.Duration, sample []float64) {
 		i := 0
 		var inst audio.Instrument
 		for {
-			if inst != nil {
+			select {
+			case <-done:
 				inst.Stop()
+				return
+			default:
+				if inst != nil {
+					inst.Stop()
+				}
+				switch wave {
+				case "sine":
+					inst = audio.NewSine(sample[i], sampleRate)
+				case "square":
+					inst = audio.NewSquare(sample[i], sampleRate)
+				case "saw":
+					inst = audio.NewSaw(sample[i], sampleRate)
+				}
+				go func() {
+					inst.Play()
+				}()
+				i = (i + 1) % len(sample)
+				<-time.After(dur)
 			}
-			switch wave {
-			case "sine":
-				inst = audio.NewSine(sample[i], sampleRate)
-			case "square":
-				inst = audio.NewSquare(sample[i], sampleRate)
-			case "saw":
-				inst = audio.NewSaw(sample[i], sampleRate)
-			}
-			go func() {
-				inst.Play()
-			}()
-			i++
-			if i == len(sample) {
-				i = 0
-			}
-			<-time.After(dur)
 		}
 	}()
 }
 
 func (s *sample) Stop() {
-	panic("not yet implemented")
+	s.sineDone <- true
+	s.squareDone <- true
+	s.sawDone <- true
 }
 
 func Initialize(r io.Reader) error {
@@ -130,8 +140,9 @@ func Play(x, y, d int) error {
 	log.Printf("Average intensity at [%d, %d, %d] is [%f, %f, %f]", x, y, d, avgR, avgG, avgB)
 
 	s := &sample{
-		sine: []float64{1000, 1200, 1500},
-		saw:  []float64{200, 900, 200},
+		sine:   []float64{1000, 1200, 1500},
+		square: []float64{500, 300},
+		saw:    []float64{200, 900, 200},
 	}
 	if playing != nil {
 		playing.Stop()

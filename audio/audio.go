@@ -114,7 +114,7 @@ func Play(x, y, d int) error {
 				continue
 			}
 			color := img.At(i, j)
-			// if transparent, skip
+			// if transparent, skip the bit.
 			r, g, b, a := color.RGBA()
 			if a == 0 {
 				continue
@@ -127,12 +127,12 @@ func Play(x, y, d int) error {
 		}
 	}
 
-	// determine the instruments depending on the microwave intensity
+	// determine the instruments depending on the intensity
 	// cold: sin wave
 	// med: square wave
 	// hot: saw wave
 
-	// determine a frequencies for each instrumentes
+	// determine frequencies for each instrumentes
 	avgR := rT / num
 	avgG := gT / num
 	avgB := bT / num
@@ -140,9 +140,9 @@ func Play(x, y, d int) error {
 	log.Printf("Average intensity at [%d, %d, %d] is [%f, %f, %f]", x, y, d, avgR, avgG, avgB)
 
 	s := &sample{
-		sine:   []float64{1000, 1200, 1500},
-		square: []float64{500, 300},
-		saw:    []float64{200, 900, 200},
+		sine:   []float64{avgB / 100, avgB / 50, avgB / 30},
+		square: []float64{avgG / 100, avgG / 50},
+		saw:    []float64{avgR / 100, avgR / 200, avgR / 300},
 	}
 	if playing != nil {
 		playing.Stop()

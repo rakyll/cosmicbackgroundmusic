@@ -45,9 +45,9 @@ func main() {
 	})
 
 	http.HandleFunc("/play", func(w http.ResponseWriter, r *http.Request) {
-		x, _ := strconv.Atoi(r.URL.Query().Get("x"))
-		y, _ := strconv.Atoi(r.URL.Query().Get("y"))
-		err := audio.Play(x, y, 50)
+		x, _ := strconv.ParseFloat(r.URL.Query().Get("x"), 64)
+		y, _ := strconv.ParseFloat(r.URL.Query().Get("y"), 64)
+		err := audio.Play(int(x), int(y), 50)
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte(err.Error()))

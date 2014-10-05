@@ -40,7 +40,7 @@ func (s *sample) Play() error {
 
 	play("sine", time.Second, s.sine, s.sineDone)
 	play("square", 500*time.Millisecond, s.square, s.squareDone)
-	play("saw", 250*time.Millisecond, s.saw, s.sawDone)
+	play("saw", 125*time.Millisecond, s.saw, s.sawDone)
 	return nil
 }
 
@@ -137,9 +137,9 @@ func Play(x, y, d int) error {
 	log.Printf("Average intensity at [%d, %d, %d] is [%f, %f, %f]", x, y, d, avgR, avgG, avgB)
 
 	s := &sample{
-		sine:   []float64{avgB / 128, avgB / 64, avgB / 24},
+		sine:   []float64{avgB / 128, avgB / 64, avgB / 32},
 		square: []float64{avgG / 128, avgG / 64},
-		saw:    []float64{avgR / 64, avgR / 16, avgR / 32, avgR / 48},
+		saw:    []float64{avgR / 16, avgR / 8, avgR / 12, avgR / 48},
 	}
 	if playing != nil {
 		playing.Stop()

@@ -139,7 +139,7 @@ func Play(x, y, d int) error {
 	s := &sample{
 		sine:   []float64{avgB / 128, avgB / 64, avgB / 24},
 		square: []float64{avgG / 128, avgG / 64},
-		saw:    []float64{avgR / 8, avgR / 16, avgR / 32, avgR / 48},
+		saw:    []float64{avgR / 64, avgR / 16, avgR / 32, avgR / 48},
 	}
 	if playing != nil {
 		playing.Stop()

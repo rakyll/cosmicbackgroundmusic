@@ -13,10 +13,8 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script type="text/javascript">
   var scale = 4096 / $(document).width();
-  $(document).ready(function() {
-    $("#bg").on("click", function(e) {
-      $.ajax({url: "/play?x=" + scale*e.pageX + "&y=" + scale*e.pageY});
-    });
+  $(document).on("click", function(e) {
+    $.ajax({url: "/play?x=" + scale*e.pageX + "&y=" + scale*e.pageY});
   });
 </script>
 
